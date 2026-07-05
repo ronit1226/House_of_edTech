@@ -1,26 +1,38 @@
-# ReadyAI
+# 🎓 ReadyAI - AI-Powered Interview Preparation Platform
 
-ReadyAI is an AI-powered interview and placement preparation platform for CS/IT students.
+> *Your personal AI mentor for placement and interview preparation*
 
-It helps a student check weak topics, practice adaptive questions, get AI explanations, prepare from resume, choose company-specific interview mode, and create a study plan.
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-18%2B-green.svg)]()
+[![Next.js](https://img.shields.io/badge/next.js-14-black.svg)]()
 
-## Main Idea
+ReadyAI is an intelligent, AI-powered interview and placement preparation platform for CS/IT students. It helps students identify weak topics, practice with adaptive questions, get AI-powered explanations, and prepare with company-specific strategies.
 
-Normally, students do not know what to study before placement. ReadyAI works like a personal AI mentor.
+## 🎯 Why ReadyAI?
 
-The complete flow is:
+The problem: Most students don't know **what to study** for placements and interviews.
 
-```text
-Signup
-Login
-Practice core CS questions
-AI finds weak topics
-AI explains wrong answers
-Dashboard shows readiness
-Resume-based AI interview
-Company-specific interview
-AI study plan
-Mock interview
+**The solution:** ReadyAI works like a **personal AI mentor** that:
+- 📊 Identifies weak topics through diagnostic testing
+- 🧠 Adapts difficulty based on your performance
+- 🤖 Provides AI-powered explanations for mistakes
+- 🎯 Generates company-specific interview questions
+- 📈 Tracks your progress with analytics
+- 📚 Creates personalized study plans
+
+## 🚀 Complete User Journey
+
+```
+1. Signup/Login
+2. Take Diagnostic Test
+3. Practice Adaptive Questions (Dynamic Difficulty)
+4. Get AI Explanations for Wrong Answers
+5. Review Dashboard (Weak Topics, Progress)
+6. Resume-Based AI Interview
+7. Company-Specific Interview Prep
+8. Generate Study Plan
+9. Mock Interviews
+10. Master Topics with Spaced Repetition
 ```
 
 ## Features
