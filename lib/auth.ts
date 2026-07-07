@@ -7,6 +7,7 @@ const refreshCookie = "readyai_refresh";
 
 export type SessionUser = {
   userId: string;
+  name: string;
   email: string;
   role: "student" | "mentor";
 };
@@ -35,6 +36,7 @@ export async function verifyToken(token: string): Promise<SessionUser> {
   const { payload } = await jwtVerify(token, secret());
   return {
     userId: String(payload.userId),
+    name: String(payload.name ?? ""),
     email: String(payload.email),
     role: payload.role === "mentor" ? "mentor" : "student",
   };

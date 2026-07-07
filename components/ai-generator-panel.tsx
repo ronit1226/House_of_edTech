@@ -30,32 +30,46 @@ export function AiGeneratorPanel({
     setLoading(true);
     setError(null);
     setResult(null);
-    const payload = Object.fromEntries(
-      fields.map((field) => {
+    try {
+      const entries: [string, string | number | string[]][] = [];
+      fields.forEach((field) => {
         const value = String(formData.get(field.name) ?? "");
+        if (!value.trim() && (field.name === "targetCompany" || field.name === "interviewDate")) {
+          return;
+        }
         if (field.type === "number") {
-          return [field.name, Number(value)];
+          entries.push([field.name, Number(value)]);
+          return;
         }
         if (field.name === "weakTopics") {
-          return [field.name, value.split(",").map((item) => item.trim()).filter(Boolean)];
+          entries.push([field.name, value.split(",").map((item) => item.trim()).filter(Boolean)]);
+          return;
         }
-        return [field.name, value];
-      }),
-    );
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await response.json();
-    setLoading(false);
+        entries.push([field.name, value]);
+      });
+      const payload = Object.fromEntries(entries);
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
 
-    if (!response.ok) {
-      setError(data.error ?? "AI generation failed.");
-      return;
+      if (!response.ok) {
+        setError(data.error ?? "AI generation failed.");
+        return;
+      }
+
+      setResult(data.result);
+    } catch {
+      setError("AI generation failed. Check your connection and API configuration.");
+    } finally {
+      setLoading(false);
     }
+  }
 
-    setResult(data.result);
+  function isRequired(field: Field) {
+    return field.name !== "targetCompany" && field.name !== "interviewDate";
   }
 
   return (
@@ -69,7 +83,7 @@ export function AiGeneratorPanel({
                 <textarea
                   id={field.name}
                   name={field.name}
-                  required
+                  required={isRequired(field)}
                   defaultValue={field.defaultValue}
                   placeholder={field.placeholder}
                   className="min-h-56 w-full rounded-md border border-slate-300 p-3 text-sm outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100"
@@ -78,6 +92,7 @@ export function AiGeneratorPanel({
                 <select
                   id={field.name}
                   name={field.name}
+                  required={isRequired(field)}
                   defaultValue={field.defaultValue ?? field.options[0]}
                   className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none focus:border-emerald-600"
                 >
@@ -92,7 +107,7 @@ export function AiGeneratorPanel({
                   id={field.name}
                   name={field.name}
                   type={field.type}
-                  required={field.name !== "targetCompany" && field.name !== "interviewDate"}
+                  required={isRequired(field)}
                   defaultValue={field.defaultValue}
                   placeholder={field.placeholder}
                 />

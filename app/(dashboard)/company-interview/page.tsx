@@ -14,6 +14,13 @@ export default function CompanyInterviewPage() {
         fields={[
           {
             type: "select",
+            name: "company",
+            label: "Company",
+            options: ["Google", "Amazon", "Microsoft", "TCS", "Infosys", "Accenture", "Capgemini", "Cognizant"],
+            defaultValue: "TCS",
+          },
+          {
+            type: "select",
             name: "level",
             label: "Difficulty",
             options: ["easy", "medium", "hard"],

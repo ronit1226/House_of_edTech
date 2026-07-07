@@ -1,423 +1,234 @@
-# 🎓 ReadyAI - AI-Powered Interview Preparation Platform
+# ReadyAI
 
-> *Your personal AI mentor for placement and interview preparation*
+ReadyAI is a Next.js application for CS/IT interview preparation. It combines a question bank, adaptive practice flow, mastery tracking, AI-generated interview prompts, and a simple dashboard so a student can prepare for placements in one place.
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node.js](https://img.shields.io/badge/node-18%2B-green.svg)]()
-[![Next.js](https://img.shields.io/badge/next.js-14-black.svg)]()
+This README reflects the current codebase and its verified behavior.
 
-ReadyAI is an intelligent, AI-powered interview and placement preparation platform for CS/IT students. It helps students identify weak topics, practice with adaptive questions, get AI-powered explanations, and prepare with company-specific strategies.
+## What the app does
 
-## 🎯 Why ReadyAI?
+The current product includes:
 
-The problem: Most students don't know **what to study** for placements and interviews.
+- User signup and login with hashed passwords and JWT-based session cookies
+- Protected routes for authenticated users
+- A diagnostic-style landing experience and an adaptive practice flow
+- A dashboard that shows readiness, weak topics, and review priorities
+- AI-generated explanations for incorrect answers
+- Spaced-repetition-style review scheduling stored in the database
+- A resume-based AI interview generator that accepts pasted text or uploaded files
+- A company-specific interview generator for supported companies
+- A study-plan generator based on weak topics, daily hours, target company, and interview date
+- A mock interview flow with AI-generated questions and feedback
 
-**The solution:** ReadyAI works like a **personal AI mentor** that:
-- 📊 Identifies weak topics through diagnostic testing
-- 🧠 Adapts difficulty based on your performance
-- 🤖 Provides AI-powered explanations for mistakes
-- 🎯 Generates company-specific interview questions
-- 📈 Tracks your progress with analytics
-- 📚 Creates personalized study plans
+## Main user journeys
 
-## 🚀 Complete User Journey
+1. Sign up or log in
+2. Visit the dashboard to see readiness and weak topics
+3. Practice questions in adaptive mode
+4. Review explanations and improve weaker topics
+5. Use the resume AI feature to generate interview questions from a resume
+6. Generate company-specific interview prompts
+7. Create a personal study plan
+8. Run a mock interview and receive AI feedback
 
-```
-1. Signup/Login
-2. Take Diagnostic Test
-3. Practice Adaptive Questions (Dynamic Difficulty)
-4. Get AI Explanations for Wrong Answers
-5. Review Dashboard (Weak Topics, Progress)
-6. Resume-Based AI Interview
-7. Company-Specific Interview Prep
-8. Generate Study Plan
-9. Mock Interviews
-10. Master Topics with Spaced Repetition
-```
+## Current routes
 
-## Features
+### Pages
 
-### 1. Authentication
+- /signup
+- /login
+- /dashboard
+- /practice
+- /resume-interview
+- /company-interview
+- /study-plan
+- /mock-interview
 
-- User can signup and login.
-- Password is hashed using bcrypt.
-- JWT access token and refresh token are used.
-- Protected API routes check authentication.
-- User data is stored in PostgreSQL.
+### API routes
 
-Pages:
+- /api/auth/signup
+- /api/auth/login
+- /api/auth/refresh
+- /api/auth/logout
+- /api/diagnostic/start
+- /api/diagnostic/submit
+- /api/attempts
+- /api/mastery
+- /api/mastery/review-queue
+- /api/ai/resume-interview
+- /api/ai/company-interview
+- /api/ai/study-plan
+- /api/mock-interview/start
+- /api/mock-interview/respond
+- /api/mock-interview/[id]
 
-```text
-/signup
-/login
-```
+## Project structure
 
-API routes:
+- app/ — Next.js App Router pages and API routes
+- components/ — UI components such as the practice session, app shell, uploader, and charts
+- lib/ — business logic and shared helpers
+  - adaptive-engine.ts — difficulty progression logic
+  - spaced-repetition.ts — review scheduling logic
+  - question-bank.ts — topic and question seed data
+  - validators.ts — Zod schemas for request validation
+  - ai/client.ts — AI provider selection and fallback behavior
+  - auth.ts — JWT/session helpers
+  - db/ — Drizzle schema and database connection
+- tests/ — unit and end-to-end tests
+- scripts/ — database seeding and setup helpers
+- drizzle/ — generated migration files
 
-```text
-/api/auth/signup
-/api/auth/login
-/api/auth/refresh
-/api/auth/logout
-```
+## Core features in more detail
 
-### 2. Adaptive Practice
+### Authentication
 
-Students can practice real interview-style questions.
+Authentication uses bcrypt for password hashing and JWT-based cookies for sessions. The app stores the user session in cookies and checks authentication in protected API routes.
 
-Subjects included:
+### Adaptive practice
 
-- Arrays
-- Dynamic Programming
-- Trees and Graphs
-- DBMS and SQL
-- Operating System
-- OOPS
+The practice experience is based on a question bank and an adaptive engine. A correct answer moves the difficulty upward, while an incorrect answer lowers it. The app also stores attempts and computes a mastery score per topic.
 
-The student can select the subject from the practice page.
+### Dashboard and mastery tracking
 
-How adaptive logic works:
+The dashboard displays:
 
-```text
-Correct answer -> next question becomes harder
-Wrong answer -> next question becomes easier
-```
+- overall readiness score
+- the weakest topic
+- a skill radar chart
+- a weak-topic heatmap
+- a review queue
 
-Page:
+Mastery data is persisted in the mastery_scores table and is used to drive the dashboard and review queue.
 
-```text
-/practice
-```
+### Resume-based AI interview
 
-Important files:
+The resume page accepts either:
 
-```text
-lib/question-bank.ts
-lib/adaptive-engine.ts
-components/practice-session.tsx
-```
+- pasted resume text, or
+- an uploaded .txt, .md, or .pdf file
 
-### 3. AI Explanation
+The server route reads the content and sends it to the AI layer to generate interview questions based on the resume content.
 
-When a student gives a wrong answer, ReadyAI asks AI to explain the mistake.
+### Company-specific interview
 
-The explanation is based on:
+The company interview page lets the user choose a company and difficulty level. The request is sent to the company interview AI route and returns a company-oriented prompt set.
 
-- Question
-- Correct answer
-- Student wrong answer
-- Topic
-- Explanation seed
+### Study planner
 
-This makes it better than only showing "wrong answer".
+The study planner uses weak topics, desired daily study hours, target company, and an interview date to produce a study plan.
 
-### 4. Spaced Repetition
+### Mock interviews
 
-ReadyAI uses an SM-2 style review scheduler.
+The mock interview flow creates an interview record, asks one question at a time, collects the student's answer, and returns AI-generated feedback and the next question.
 
-This means weak topics come back for revision later.
+## Tech stack
 
-Example:
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Radix UI primitives
+- PostgreSQL
+- Drizzle ORM
+- JWT auth with jose
+- bcryptjs
+- Zod
+- Vercel AI SDK
+- Google AI / Groq providers
+- Recharts
+- Vitest
+- Playwright
 
-```text
-Wrong answer today -> topic appears again soon
-Correct answer multiple times -> review interval increases
-```
+## Database
 
-Important file:
+The app uses PostgreSQL and Drizzle ORM. The main tables are:
 
-```text
-lib/spaced-repetition.ts
-```
+- users
+- topics
+- questions
+- attempts
+- mastery_scores
+- mock_interviews
 
-### 5. Dashboard
+The schema is defined in lib/db/schema.ts.
 
-Dashboard shows:
+## Environment variables
 
-- Overall readiness score
-- Weak topic priority
-- Skill radar chart
-- Weak topic heatmap
-- Today review queue
-- Links to AI features
-
-Page:
-
-```text
-/dashboard
-```
-
-### 6. Resume-Based AI Interview
-
-This is one of the best features.
-
-Student can upload or paste resume text.
-
-ReadyAI reads the resume and generates interview questions from:
-
-- Skills
-- Projects
-- Internship
-- Experience
-- Target company
+Create a local environment file named .env.local in the project root.
 
 Example:
-
-If resume has React, Node.js, MongoDB, ReadyAI can ask:
-
-```text
-Why did you use MongoDB?
-Explain JWT authentication.
-Tell me about your AI Resume Builder project.
-What challenge did you face?
-```
-
-Page:
-
-```text
-/resume-interview
-```
-
-API:
-
-```text
-/api/ai/resume-interview
-```
-
-### 7. Company-Specific Interview
-
-Different companies ask different types of questions.
-
-ReadyAI supports:
-
-- Google
-- Amazon
-- Microsoft
-- TCS
-- Infosys
-- Accenture
-- Capgemini
-- Cognizant
-
-Example:
-
-TCS focuses more on:
-
-- OOPS
-- DBMS
-- OS
-- CN
-- Easy coding
-
-Amazon focuses more on:
-
-- DSA
-- Projects
-- Behavioral questions
-- System thinking
-
-Page:
-
-```text
-/company-interview
-```
-
-API:
-
-```text
-/api/ai/company-interview
-```
-
-### 8. AI Study Planner
-
-ReadyAI creates a study timetable based on:
-
-- Weak topics
-- Daily study hours
-- Target company
-- Interview date
-
-Example:
-
-```text
-Today:
-Graphs - 45 min
-Operating System - 30 min
-SQL - 30 min
-Mock interview - 20 min
-```
-
-Page:
-
-```text
-/study-plan
-```
-
-API:
-
-```text
-/api/ai/study-plan
-```
-
-### 9. AI Mock Interview
-
-ReadyAI can conduct a short mock interview.
-
-Flow:
-
-```text
-Start interview
-AI asks question
-Student answers
-AI gives feedback
-Next question
-Final feedback
-```
-
-Page:
-
-```text
-/mock-interview
-```
-
-API:
-
-```text
-/api/mock-interview/start
-/api/mock-interview/respond
-/api/mock-interview/[id]
-```
-
-## Tech Stack
-
-```text
-Next.js 16
-React
-TypeScript
-Tailwind CSS
-Radix/shadcn-style UI
-PostgreSQL Neon
-Drizzle ORM
-JWT Auth
-bcrypt
-Zod validation
-Vercel AI SDK
-Gemini/Groq AI
-Recharts
-Vitest
-Playwright
-```
-
-## Database Tables
-
-Main tables:
-
-```text
-users
-topics
-questions
-attempts
-mastery_scores
-mock_interviews
-```
-
-Important database features:
-
-- Users are stored securely.
-- Password hashes are stored, not real passwords.
-- Attempts store user answers.
-- Mastery scores store topic readiness.
-- Mock interviews store transcript and feedback.
-
-## Environment Variables
-
-Create a file:
-
-```text
-.env.local
-```
-
-Add:
 
 ```env
-DATABASE_URL=your_neon_database_url
-JWT_SECRET=your_secret_key
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/readyai
+JWT_SECRET=change-this-to-a-long-random-string
 GROQ_API_KEY=
-GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key
+GOOGLE_GENERATIVE_AI_API_KEY=
 ```
 
-If Gemini is not working, check that the key is correct. Gemini API keys usually come from Google AI Studio.
+Notes:
 
-## How To Run
+- DATABASE_URL is required for the database connection.
+- JWT_SECRET is used for signing session tokens.
+- GROQ_API_KEY and GOOGLE_GENERATIVE_AI_API_KEY are optional. If neither is set, the app falls back to built-in local sample output in lib/ai/client.ts.
 
-Open terminal inside project folder:
+## Setup
 
-```text
-C:\Users\PC\Desktop\House of ed tech\readyai
-```
+Prerequisites:
 
-Run:
+- Node.js and npm
+- A PostgreSQL server
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Create or update the database schema:
+
+```bash
 npm run db:push
+```
+
+Seed the initial topic and question data:
+
+```bash
 npm run db:seed
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
 
-Open:
+Then open http://localhost:3000.
 
-```text
-http://localhost:3000
-```
+## Testing and build checks
 
-## Testing
-
-Run:
+Run unit tests:
 
 ```bash
 npm test
-npm run lint
+```
+
+Run the production build:
+
+```bash
 npm run build
 ```
 
-Current tests cover:
+Optional lint check:
 
-- Adaptive difficulty engine
-- Spaced repetition scheduler
+```bash
+npm run lint
+```
 
-## Security
+## Notes about the current implementation
 
-Security features used:
-
-- bcrypt password hashing
-- JWT authentication
-- httpOnly cookies
-- Zod input validation
-- Protected API routes
-- Row-level user ownership checks
-- No plaintext password storage
-- No real secrets committed
-
-## Assignment Explanation
-
-This project is not a normal quiz app or CRUD app.
-
-The main value is:
-
-- Adaptive difficulty algorithm
-- Spaced repetition scheduler
-- AI explanation
-- Resume-based interview
-- Company-specific preparation
-- Study planner
-- Dashboard analytics
-
-This makes ReadyAI look like a real AI placement preparation platform.
-
-## Known Limitations
-
-- Resume PDF upload works best when text is readable. If PDF text is not extracted properly, paste resume text manually.
+- The app is currently wired to work with a PostgreSQL database and uses Drizzle migrations and schema definitions.
+- AI features are available when API keys are configured; otherwise the app still returns deterministic fallback content.
+- The resume uploader accepts file uploads and parses text from supported text-based files and PDF files.
+- The UI currently focuses on student preparation flows; there is no active mentor dashboard in the current app surface.
 - AI quality depends on valid Gemini or Groq API key.
 - Before final submission, replace placeholder GitHub and LinkedIn links in footer.
 - Rotate any API keys that were pasted in chat.

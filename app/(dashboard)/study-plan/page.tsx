@@ -5,7 +5,6 @@ export default function StudyPlanPage() {
   return (
     <AppShell>
       <div className="mb-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">Personal mentor</p>
         <h1 className="mt-1 text-3xl font-semibold">AI personalized study planner</h1>
         <p className="text-slate-600">
           Turn weak topics and interview deadline into a practical timetable.

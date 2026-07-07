@@ -3,6 +3,26 @@ import { groq } from "@ai-sdk/groq";
 import { generateText } from "ai";
 
 function fallbackFromPrompt(prompt: string) {
+  if (prompt.toLowerCase().includes("study plan")) {
+    return `1. Today's Plan
+9:00 AM - Graphs practice, 45 min
+10:00 AM - Operating System revision, 30 min
+11:00 AM - SQL queries, 30 min
+12:00 PM - Mock interview, 20 min
+2. 7-Day Plan
+Day 1: DSA arrays and strings
+Day 2: DBMS keys, joins, normalization
+Day 3: OS process, threads, deadlock
+Day 4: CN TCP, UDP, DNS, HTTP
+Day 5: OOPS pillars and coding
+Day 6: Resume/project interview
+Day 7: Full mock test and revision
+3. Topic Priority Order: weakest topics first, then company-specific topics.
+4. Practice Mix: 40% DSA, 30% core CS, 20% project, 10% HR.
+5. Mock Interview Schedule: one short mock every alternate day.
+6. Final revision checklist: resume, SQL, OOPS, OS, CN, top coding patterns.`;
+  }
+
   if (prompt.toLowerCase().includes("resume")) {
     return `1. Extracted Skills: React, Node.js, Express, MongoDB, SQL, Authentication
 2. Extracted Projects:
@@ -44,26 +64,6 @@ Technical fundamentals, coding basics, project discussion, and HR communication.
 5. Preparation Advice: Revise OOPS, DBMS, OS, CN, SQL queries, and your project flow.`;
   }
 
-  if (prompt.toLowerCase().includes("study plan")) {
-    return `1. Today's Plan
-9:00 AM - Graphs practice, 45 min
-10:00 AM - Operating System revision, 30 min
-11:00 AM - SQL queries, 30 min
-12:00 PM - Mock interview, 20 min
-2. 7-Day Plan
-Day 1: DSA arrays and strings
-Day 2: DBMS keys, joins, normalization
-Day 3: OS process, threads, deadlock
-Day 4: CN TCP, UDP, DNS, HTTP
-Day 5: OOPS pillars and coding
-Day 6: Resume/project interview
-Day 7: Full mock test and revision
-3. Topic Priority Order: weakest topics first, then company-specific topics.
-4. Practice Mix: 40% DSA, 30% core CS, 20% project, 10% HR.
-5. Mock Interview Schedule: one short mock every alternate day.
-6. Final revision checklist: resume, SQL, OOPS, OS, CN, top coding patterns.`;
-  }
-
   return `AI Interview Questions:
 1. Explain the core concept in simple words.
 2. Give one real coding or project example.
@@ -74,9 +74,17 @@ Feedback Rubric: correctness, clarity, completeness, complexity, and real-world 
 }
 
 export async function generateAiText(prompt: string) {
-  const model = process.env.GROQ_API_KEY
+  const groqApiKey = process.env.GROQ_API_KEY?.trim();
+  const googleApiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim();
+  const model = groqApiKey
     ? groq("llama-3.3-70b-versatile")
-    : google("gemini-2.0-flash");
+    : googleApiKey
+      ? google("gemini-2.0-flash")
+      : null;
+
+  if (!model) {
+    return fallbackFromPrompt(prompt);
+  }
 
   try {
     const result = await generateText({
@@ -86,7 +94,8 @@ export async function generateAiText(prompt: string) {
     });
 
     return result.text;
-  } catch {
+  } catch (error) {
+    console.error("ReadyAI provider failed. Using local fallback output.", error);
     return fallbackFromPrompt(prompt);
   }
 }

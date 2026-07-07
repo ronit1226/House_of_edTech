@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { ArrowRight, BrainCircuit, CalendarClock, Building2, FileText, Flame, Target } from "lucide-react";
 import { AppShell } from "@/components/app-shell";
@@ -5,19 +6,32 @@ import { SkillRadarChart } from "@/components/charts/radar-chart";
 import { WeakTopicHeatmap } from "@/components/charts/weak-topic-heatmap";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { getSession } from "@/lib/auth";
+import { db } from "@/lib/db";
+import { masteryScores } from "@/lib/db/schema";
+import { topicBank } from "@/lib/question-bank";
 
-const mastery = [
-  { topic: "Arrays", score: 78 },
-  { topic: "Dynamic Programming", score: 42 },
-  { topic: "Trees and Graphs", score: 61 },
-  { topic: "DBMS and SQL", score: 70 },
-  { topic: "Operating System", score: 56 },
-  { topic: "OOPS", score: 48 },
-];
+async function getMastery(userId: string) {
+  const rows = await db.query.masteryScores.findMany({
+    where: eq(masteryScores.userId, userId),
+  });
 
-export default function DashboardPage() {
-  const readiness = Math.round(mastery.reduce((total, topic) => total + topic.score, 0) / mastery.length);
+  return topicBank.map((topic) => {
+    const row = rows.find((item) => item.topicId === topic.id);
+    return {
+      topic: topic.name,
+      score: Number(row?.score ?? 0),
+    };
+  });
+}
+
+export default async function DashboardPage() {
+  const session = await getSession();
+  const mastery = session ? await getMastery(session.userId) : topicBank.map((t) => ({ topic: t.name, score: 0 }));
+
+  const readiness = Math.round(mastery.reduce((total, topic) => total + topic.score, 0) / Math.max(1, mastery.length));
   const weakTopics = [...mastery].sort((a, b) => a.score - b.score).slice(0, 3);
+  const topWeakTopic = weakTopics[0];
 
   return (
     <AppShell>
@@ -25,7 +39,7 @@ export default function DashboardPage() {
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">Placement cockpit</p>
           <h1 className="mt-1 text-3xl font-semibold">Readiness dashboard</h1>
-          <p className="text-slate-600">Your current skill map, weak areas, and today’s best next action.</p>
+          <p className="text-slate-600">Your current skill map, weak areas, and today&apos;s best next action.</p>
         </div>
         <Button asChild>
           <Link href="/practice">
@@ -43,20 +57,20 @@ export default function DashboardPage() {
         <Card>
           <Target className="h-5 w-5 text-emerald-700" />
           <p className="mt-3 text-sm text-slate-600">Highest priority</p>
-          <p className="mt-1 text-2xl font-semibold">{weakTopics[0].topic}</p>
-          <p className="mt-1 text-sm text-slate-600">{weakTopics[0].score}% mastery</p>
+          <p className="mt-1 text-2xl font-semibold">{topWeakTopic.topic}</p>
+          <p className="mt-1 text-sm text-slate-600">{topWeakTopic.score}% mastery</p>
         </Card>
         <Card>
           <Flame className="h-5 w-5 text-rose-600" />
           <p className="mt-3 text-sm text-slate-600">AI recommendation</p>
-          <p className="mt-1 text-2xl font-semibold">Review DP today</p>
+          <p className="mt-1 text-2xl font-semibold">Review {topWeakTopic.topic} today</p>
           <p className="mt-1 text-sm text-slate-600">Then attempt a mock interview.</p>
         </Card>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
         <Card>
-          <h2 className="font-semibold">Today’s review queue</h2>
+          <h2 className="font-semibold">Today&apos;s review queue</h2>
           <div className="mt-5 space-y-3">
             {weakTopics.map((topic) => (
               <Link

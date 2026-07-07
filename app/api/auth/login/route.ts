@@ -35,7 +35,12 @@ export async function POST(request: Request) {
       return apiError("Invalid email or password", "INVALID_CREDENTIALS", 401);
     }
 
-    const session = { userId: user.id, email: user.email, role: user.role as "student" | "mentor" };
+    const session = {
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role as "student" | "mentor",
+    };
     const response = NextResponse.json({ user: session });
     authCookies(await signToken(session), await signToken(session, "7d")).forEach((cookie) =>
       response.headers.append("Set-Cookie", cookie),

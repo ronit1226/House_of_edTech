@@ -23,7 +23,12 @@ export async function POST(request: Request) {
         passwordHash: await hashPassword(input.password),
       })
       .returning();
-    const session = { userId: user.id, email: user.email, role: user.role as "student" | "mentor" };
+    const session = {
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role as "student" | "mentor",
+    };
     const response = NextResponse.json({ user: session }, { status: 201 });
     authCookies(await signToken(session), await signToken(session, "7d")).forEach((cookie) =>
       response.headers.append("Set-Cookie", cookie),
