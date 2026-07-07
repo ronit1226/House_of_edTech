@@ -74,8 +74,16 @@ Feedback Rubric: correctness, clarity, completeness, complexity, and real-world 
 }
 
 export async function generateAiText(prompt: string) {
-  const groqApiKey = process.env.GROQ_API_KEY?.trim();
-  const googleApiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY?.trim();
+  const groqApiKey = [process.env.GROQ_API_KEY, process.env.GROQ_API_TOKEN]
+    .find((value) => value?.trim())
+    ?.trim();
+  const googleApiKey = [
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+    process.env.GOOGLE_API_KEY,
+    process.env.GEMINI_API_KEY,
+  ]
+    .find((value) => value?.trim())
+    ?.trim();
   const model = groqApiKey
     ? groq("llama-3.3-70b-versatile")
     : googleApiKey
